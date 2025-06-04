@@ -1,14 +1,39 @@
+"use client"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useState } from "react";
+
+async function handleSignup(email:string , password:string) {
+  const res = await fetch ('/api/signup',{
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({email,password}),
+  });
+
+  const data = await res.json();
+  if(!res.ok){
+    console.error('Signup failed', data.error);
+  } else {
+    console.log('Signup successful',data.message);
+  }
+}
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
+  const [email,setEmail] = useState("");
+  const [password,setPassword] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await handleSignup(email,password);
+  }
+
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props}>
+    <form className={cn("flex flex-col gap-6", className)} onSubmit={handleSubmit} {...props}>
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Singup a account</h1>
         <p className="text-muted-foreground text-sm text-balance">
@@ -18,7 +43,10 @@ export function SignupForm({
       <div className="grid gap-6">
         <div className="grid gap-3">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" placeholder="m@example.com" required />
+          <Input id="email" type="email" placeholder="m@example.com" required  
+          value={email}
+          onChange={(e)=> setEmail(e.target.value)}
+          />
         </div>
         <div className="grid gap-3">
           <div className="flex items-center">
@@ -30,7 +58,10 @@ export function SignupForm({
               Forgot your password?
             </a>
           </div>
-          <Input id="password" type="password" required />
+          <Input id="password" type="password" required  
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          />
         </div>
         <Button type="submit" className="w-full">
           Login
